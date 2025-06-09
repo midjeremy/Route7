@@ -1,11 +1,9 @@
 from kivy.uix.screenmanager import Screen
-<<<<<<< HEAD
-#from db import get_db
 
-#db = get_db()
-#colleccion = db["Usuario_Camionero"]
-=======
->>>>>>> ec6608602702be122cda71aa1904fa7aac459d38
+from db import get_db
+
+db = get_db()
+colleccion = db["Usuario_Camionero"]
 
 class Login(Screen):
     """
