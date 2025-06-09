@@ -1,4 +1,8 @@
 from kivy.uix.screenmanager import Screen
+from db import get_db
+
+dataBase = get_db()
+
 
 class Login(Screen):
     """
@@ -7,7 +11,7 @@ class Login(Screen):
     """
     pass
 
-def validate_user(username, password):
+def validate_user(rut, password):
     """
     VALIDACION DE USUARIO RESPECTIVO A LA BASE DE DATOS Y COLECCION
 
@@ -40,8 +44,28 @@ def validate_user(username, password):
     :return: True si el usuario y la contrasena son correctos, False en caso contrario
 
     """
-    '''usuario = dataBase['Usuarios_Camioneros'].fingd_one({
-        'username': username,'''
+
     
-    user = None
-    return user is not None
+    usuario = dataBase['Usuarios_Camioneros'].find_one({
+    'rut': rut,
+    'password': password,
+    })
+
+    if usuario:
+        return True
+    else:
+        False
+    
+    usuario = dataBase['Usuarios_Admin'].find_one({
+    'rut': rut,
+    'password': password,
+    })
+
+    if usuario:
+        return True
+    else:
+        False
+
+    return ''
+
+
