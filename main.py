@@ -1,20 +1,25 @@
-from kivymd.app import MDApp
+from kivy.app import App
+from kivy.uix.screenmanager import ScreenManager
 from kivy.lang import Builder
-from kivy.core.window import Window
-from kivy.uix.screenmanager import Screen
 
-class testApp (Screen):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        pass
+from APP.login import Login
+from APP.admin import AdminScreen
+from APP.user import UserScreen
 
+class MyScreenManager(ScreenManager):
+    """
+    MyScreenManager class that inherits from ScreenManager.
+    This class manages the screens in the Kivy application.
+    """
+    pass
 
-class MyApp(MDApp):
+class MyApp(App):
     def build(self):
-        self.theme_cls.theme_style = "Dark"
-        return testApp()
-    if __name__ == "__main__":
-        Window.size = (360,640)
-        Builder.load_file("template\main.kv")
+        Builder.load_file('template/Login.kv')
+        Builder.load_file('template/admin.kv')
+        Builder.load_file('template/user.kv')
 
-MyApp().run()
+        return MyScreenManager()
+    
+if __name__ == '__main__':
+    MyApp().run()
