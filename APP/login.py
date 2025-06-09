@@ -1,7 +1,4 @@
 from kivy.uix.screenmanager import Screen
-from db import get_db
-
-dataBase = get_db()
 
 class Login(Screen):
     """
