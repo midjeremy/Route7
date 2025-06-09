@@ -1,0 +1,5 @@
+antes de iniciar cualquer trabajo = git pull origin main
+para agregar archivos nuevos o eliminarlos = git add .
+antes de mandar al github = git commit -m 'COMENTARIO OBLIGATORIO'
+para mandar = git push origin main
+para actualizar git pull origin main
