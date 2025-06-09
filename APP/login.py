@@ -3,7 +3,6 @@ from db import get_db
 
 dataBase = get_db()
 
-
 class Login(Screen):
     """
     UserScreen class that inherits from Screen.
@@ -44,27 +43,6 @@ def validate_user(rut, password):
     :return: True si el usuario y la contrasena son correctos, False en caso contrario
 
     """
-
-    
-    usuario = dataBase['Usuarios_Camioneros'].find_one({
-    'rut': rut,
-    'password': password,
-    })
-
-    if usuario:
-        return True
-    else:
-        False
-    
-    usuario = dataBase['Usuarios_Admin'].find_one({
-    'rut': rut,
-    'password': password,
-    })
-
-    if usuario:
-        return True
-    else:
-        False
 
     return ''
 
