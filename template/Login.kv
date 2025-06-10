@@ -1,74 +1,44 @@
-<testApp>:
+<LoginScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [20, 60, 20, 20]  # Margen móvil
+        spacing: 20
 
-    Screen:
+        Label:
+            text: "Ingreso con RUT"
+            font_size: 28
+            bold: True
+            size_hint_y: None
+            height: self.texture_size[1]
 
-        MDLabel:
-            text: "Bienvenido"
-            font_size: "48dp"
-            align: "center"
-            color: "#07aa09"
-            pos_hint: {"center_y": .8}
+        TextInput:
+            id: rut_input
+            hint_text: "Ej: 12.345.678-9"
+            multiline: False
+            input_filter: lambda text, from_undo: text.upper()
+            size_hint_y: None
+            height: 45
 
-        MDTextField:
-            hint_text: "Correo Electronico"
-            icon_right: "email"
-            font_size: "20dp"
-            size_hint_x: .85
-            pos_hint: {"center_x": .5, "center_y": .65}
-            on_text: self.text = self.text.replace(" ", "")
-            write_tab: False
-
-        MDTextField:
-            id: passwrd
-            password: True
+        TextInput:
+            id: password_input
             hint_text: "Contraseña"
-            icon_right: "eye-off"
-            font_size: "20dp"
-            size_hint_x: .85
-            pos_hint: {"center_x": .5, "center_y": .5}
-            on_text: self.text = self.text.replace(" ", "")
-            write_tab: False
+            password: True
+            multiline: False
+            size_hint_y: None
+            height: 45
 
-        BoxLayout:
-            size_hint: .85, None
-            height: "30dp"
-            pos_hint: {"center_x": .5, "center_y": .4}
-            spacing: "5dp"
+        Button:
+            text: "Iniciar Sesión"
+            size_hint_y: None
+            height: 50
+            on_release:
+                root.verificar_credenciales(rut_input.text, password_input.text)
 
-            MDCheckbox:
-                id: cajacheck
-                size_hint: None, None
-                width: "30dp"
-                height: "30dp"
-                pos_hint: {"center_x": .5, "center_y": .5}
-                on_press:
-                    passwrd.password = False if passwrd.password == True else True
-
-            MDLabel:
-                text: "[ref=Show Password]Mostrar Contraseña[/ref]"
-                markup: True
-                pos_hint: {"center_x": .5, "center_y": .5}
-                on_ref_press:
-                    cajacheck.active = False if cajacheck.active == True else True
-                    passwrd.password = False if passwrd.password == True else True
-
-
-
-        BoxLayout:
-            size_hint: .85, None
-            height: "30dp"
-            pos_hint: {"center_x": .5, "center_y": .3}
-            spacing: "5dp"
-
-            MDFlatButton:
-                text: "Iniciar Sesion"
-                font_size: "22dp"
-                size_hint_x: 1
-                md_bg_color: "#07aa09"
-
-            MDFlatButton:
-                text: "Registrarse"
-                font_size: "22dp"
-                size_hint_x: 1
-                md_bg_color: "#07aa09"
-                
+        Label:
+            id: mensaje_error
+            text: ""
+            color: (1, 0, 0, 1)
+            font_size: 16
+            halign: "center"
+            size_hint_y: None
+            height: 30

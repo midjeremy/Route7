@@ -1,51 +1,55 @@
 from kivy.uix.screenmanager import Screen
-
 from db import get_db
 
+# Obtener la colección de usuarios
 db = get_db()
-colleccion = db["Usuario_Camionero"]
+coleccion = db["Usuario_Camionero"]
 
-class Login(Screen):
-    """
-    UserScreen class that inherits from Screen.
-    This class represents a screen in the Kivy application.
-    """
-    pass
+class LoginScreen(Screen):
 
-def validate_user(rut, password):
-    """
-    VALIDACION DE USUARIO RESPECTIVO A LA BASE DE DATOS Y COLECCION
+    def verificar_credenciales(self, rut, contrasena):
+        if not self.validar_rut(rut):
+            self.ids.mensaje_error.text = "RUT inválido"
+            return
 
-    :parametro usuario camionero
-    :parametro contrasena camionero
+        if contrasena == "":
+            self.ids.mensaje_error.text = "Debe ingresar la contraseña"
+            return
 
-    :return: True si el usuario y la contrasena son correctos, False en caso contrario
+        # Simulación de validación (reemplazar con lógica real/API)
+        if rut == "12.345.678-9" and contrasena == "1234":
+            self.ids.mensaje_error.text = ""
+            self.manager.current = "pantalla1"
+        else:
+            self.ids.mensaje_error.text = "Credenciales incorrectas"
 
-    Esta funcion valida si el usuario y la contrasena son correctos
-    SE VUELVE A BUSCAR EN LA BASE DE DATOS PARA VERIFICAR SI EL USUARIO EXISTE
-
-    :parametro username: Nombre de usuario del camionero
-    :parametro password: Contrasena del camionero
-    :return: True si el usuario y la contrasena son correctos, False en caso contrario
-
-    SI NO SE ENCUENTRA EL USUARIO O LA CONTRASENA NO ES CORRECTA, SE RETORNA False;
-
-    SE BUSCA USUARIO ADMIN EN LA BASE DE DATOS
-
-    :parametro usuario administrador
-    :parametro contrasena administrador
-
-    :return: True si el usuario y la contrasena son correctos, False en caso contrario
-
-    Esta funcion valida si el usuario y la contrasena son correctos
-    SE VUELVE A BUSCAR EN LA BASE DE DATOS PARA VERIFICAR SI EL USUARIO EXISTE
-
-    :parametro username: Nombre de usuario del administrador
-    :parametro password: Contrasena del administrador
-    :return: True si el usuario y la contrasena son correctos, False en caso contrario
-
-    """
-
-    return ''
+    def validar_rut(self, rut):
+        rut = rut.replace(".", "").replace("-", "")
 
 
+        dv = rut[-1]
+        rut = rut[:-1]
+
+        rut = list(rut)
+        rut.reverse()
+
+        factores= [2, 3, 4, 5, 6, 7, 2, 3]
+        suma = 0
+        for indice, digito in enumerate(rut):
+            factor = factores[indice]
+            resultado = factor * int(digito)
+            suma += resultado
+
+        division = int(suma / 11)
+        multiplicacion = division * 11
+
+        resta = suma - multiplicacion
+
+        digito_real = 11-resta
+
+        if digito_real == 10:
+            digito_real = "k"
+        elif digito_real == 11:
+            digito_real = 0
+
+        return dv == str(digito_real)

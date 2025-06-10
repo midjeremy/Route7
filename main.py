@@ -1,25 +1,22 @@
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager
-from kivy.lang import Builder
 
-from APP.login import Login
-from APP.admin import AdminScreen
-from APP.user import UserScreen
+#importar pantallas
+from APP.login import LoginScreen
 
 class MyScreenManager(ScreenManager):
-    """
-    MyScreenManager class that inherits from ScreenManager.
-    This class manages the screens in the Kivy application.
-    """
     pass
 
-class MyApp(App):
+class MiApp(App):
     def build(self):
-        Builder.load_file('template/Login.kv')
-        Builder.load_file('template/admin.kv')
-        Builder.load_file('template/user.kv')
+        self.title = "Route 7"
+        #carga manual de los archivos kv
+        from kivy.lang import Builder
+        Builder.load_file('template/login.kv')
 
-        return MyScreenManager()
+        sm = MyScreenManager()
+        sm.add_widget(LoginScreen(name='login'))
+        return sm
     
 if __name__ == '__main__':
-    MyApp().run()
+    MiApp().run()
