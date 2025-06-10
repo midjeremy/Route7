@@ -1,0 +1,76 @@
+<adminScreen>:
+    name: 'camiones'
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 15
+        canvas.before:
+            Color:
+                rgba: 0.8, 0.95, 0.95, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        BoxLayout:
+            size_hint_y: None
+            height: '40dp'
+            spacing: 10
+
+            Button:
+                text: "Usuario"
+                background_color: 0, 0.5, 0.4, 1
+
+            Button:
+                text: "Desconectar"
+                background_color: 0.6, 0, 0, 1
+                on_release: root.desconectar()
+
+        Label:
+            text: "Camiones en Ruta"
+            font_size: '20sp'
+            bold: True
+            color: 0, 0.2, 0.2, 1
+            size_hint_y: None
+            height: '30dp'
+
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: 10
+
+            BoxLayout:
+                spacing: 10
+                Label:
+                    text: "Camión 1"
+                Button:
+                    text: "Localizar"
+                    on_release: root.localizar_camion(1)
+
+            BoxLayout:
+                spacing: 10
+                Label:
+                    text: "Camión 2"
+                Button:
+                    text: "Localizar"
+                    on_release: root.localizar_camion(2)
+
+            BoxLayout:
+                spacing: 10
+                Label:
+                    text: "Camión 3"
+                Button:
+                    text: "Localizar"
+                    on_release: root.localizar_camion(3)
+
+        Button:
+            text: "Ver Mapa de Rutas"
+            size_hint_y: None
+            height: '40dp'
+            background_color: 0, 0.4, 0.3, 1
+            on_release: root.ver_mapa()
+
+        Label:
+            text: "LOGO LA GRANJA"
+            size_hint_y: None
+            height: '30dp'
+            color: 0, 0.4, 0.4, 1
+            bold: True
