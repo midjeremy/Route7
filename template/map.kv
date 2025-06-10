@@ -1,0 +1,18 @@
+<MapScreen>:
+    name: 'mapa'
+
+    BoxLayout:
+        orientation: 'vertical'
+
+        MapView:
+            id: map_view
+            zoom: 10
+            lat: 40.4168
+            lon: -3.7038
+            on_touch_down: root.on_map_touch(self, args[1])
+
+        Button:
+            text: 'Limpiar Ruta'
+            size_hint_y: None
+            height: 50
+            on_press: root.limpiar_ruta()
