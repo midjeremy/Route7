@@ -1,13 +1,18 @@
 from kivy.uix.screenmanager import Screen
 from db import get_db
+import os
 
-# Obtener la colección de usuarios
+# Conexión a MongoDB
 db = get_db()
-coleccion = db["Usuario_Camionero"]
+coleccion_UC = db["Usuario_Camionero"]
+coleccion_UA = db["Usuario_Admin"]
+
 
 class LoginScreen(Screen):
 
     def verificar_credenciales(self, rut, contrasena):
+        rut = rut.replace(".", "").replace(" ", "").upper()
+
         if not self.validar_rut(rut):
             self.ids.mensaje_error.text = "RUT inválido"
             return
@@ -15,17 +20,37 @@ class LoginScreen(Screen):
         if contrasena == "":
             self.ids.mensaje_error.text = "Debe ingresar la contraseña"
             return
+        verificar = self.verificar_type_user(rut, contrasena)
 
-        # Simulación de validación (reemplazar con lógica real/API)
-        if rut == "12.345.678-9" and contrasena == "1234":
-            self.ids.mensaje_error.text = ""
-            self.manager.current = "pantalla1"
+
+    def verificar_type_user(self, rut, contrasena):
+        usuario = coleccion_UC.find_one({"rut": rut})
+        if usuario:
+            if usuario.get("contrasena") == contrasena:
+                self.ids.mensaje_error.text = ""
+                self.manager.current = "mapa"
+                os.system('cls')
+                print(f'{usuario.get('rut')} || {usuario.get('contrasena')}')
+            else:
+                self.ids.mensaje_error.text = "Contraseña incorrecta"
+        
+        usuario = coleccion_UA.find_one({"rut": rut})
+        if usuario:
+            if usuario.get("contrasena") == contrasena:
+                self.ids.mensaje_error.text = ""
+                self.manager.current = "admin"
+                os.system('cls')
+                print(f'{usuario.get("rut")} || {usuario.get("contrasena")}')
+            else:
+                self.ids.mensaje_error.text = "Contraseña incorrecta"
         else:
-            self.ids.mensaje_error.text = "Credenciales incorrectas"
+            self.ids.mensaje_error.text = "Usuario no encontrado"
+
+            
+
 
     def validar_rut(self, rut):
         rut = rut.replace(".", "").replace("-", "")
-
 
         dv = rut[-1]
         rut = rut[:-1]
@@ -52,4 +77,4 @@ class LoginScreen(Screen):
         elif digito_real == 11:
             digito_real = 0
 
-        return dv == str(digito_real)
+        return dv == str(digito_real).lower()
