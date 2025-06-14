@@ -1,6 +1,4 @@
 <MapScreen>:
-    name: 'mapa'
-
     BoxLayout:
         orientation: 'vertical'
 
@@ -11,8 +9,20 @@
             lon: -3.7038
             on_touch_down: root.on_map_touch(self, args[1])
 
-        Button:
-            text: 'Limpiar Ruta'
+        BoxLayout:
             size_hint_y: None
             height: 50
-            on_press: root.limpiar_ruta()
+
+            Button:
+                text: 'Guardar Ruta'
+                on_press: root.save_ruta()
+
+            Spinner:
+                id: ruta_selector
+                text: 'Selecciona Ruta'
+                values: []
+                on_text: root.cargar_ruta(self.text)
+
+            Button:
+                text: 'Limpiar Ruta'
+                on_press: root.limpiar_ruta()
