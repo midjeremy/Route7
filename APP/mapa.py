@@ -9,22 +9,22 @@ from kivy.graphics import Line, Color
 class MapScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.puntos = []
+        self.puntos = []  # Guarda (lat, lon)
         self.linea = None
-        self.rutas_guardadas = {}  # Aquí estaba mal
+        self.rutas_guardadas = {}
+
+    def on_kv_post(self, base_widget):
+        self.ids.map_view.bind(on_touch_down=self.on_map_touch)
 
     def on_map_touch(self, map_view, touch):
         if not map_view.collide_point(*touch.pos):
             return False
 
-        coord = map_view.get_latlon_at(touch.x, touch.y)
-        lat, lon = coord
-
+        lat, lon = map_view.get_latlon_at(touch.x, touch.y)
         marker = MapMarker(lat=lat, lon=lon)
         map_view.add_widget(marker)
 
-        self.puntos.append((touch.x, touch.y))
-
+        self.puntos.append((lat, lon))
         self.dibujar_ruta(map_view)
         return True
 
@@ -32,23 +32,29 @@ class MapScreen(Screen):
         if self.linea:
             map_view.canvas.remove(self.linea)
 
+        puntos_dibujo = []
+        for lat, lon in self.puntos:
+            x, y = map_view.get_window_xy_from(lat, lon, map_view.zoom)
+            puntos_dibujo.extend([x, y])
+
         with map_view.canvas:
             Color(1, 0, 0, 1)
-            self.linea = Line(points=sum(self.puntos, ()), width=2)
+            self.linea = Line(points=puntos_dibujo, width=2)
 
     def limpiar_ruta(self):
         self.puntos.clear()
         self.ids.map_view.canvas.clear()
+        self.linea = None
+        self.ids.map_view.children[:] = [
+            w for w in self.ids.map_view.children if not isinstance(w, MapMarker)
+        ]
 
-        self.ids.map_view.children[:] = [w for w in self.ids.map_view.children if not isinstance(w, MapMarker)]
-
-    #guardar ruta
     def save_ruta(self):
         if not self.puntos:
             return
 
         layout = BoxLayout(orientation="vertical", spacing=10, padding=10)
-        input_name = TextInput(hint_text="Nombre de la ruta")
+        input_name = TextInput(hint_text="Nombre de la ruta", multiline=False)
         btn_guardar = Button(text="Guardar")
 
         popup = Popup(title="Guardar Ruta", content=layout, size_hint=(0.8, 0.4))
@@ -60,26 +66,25 @@ class MapScreen(Screen):
             if name_ruta:
                 self.rutas_guardadas[name_ruta] = list(self.puntos)
                 self.ids.ruta_selector.values = list(self.rutas_guardadas.keys())
-                print(f"Ruta Guardada: {name_ruta}")
                 popup.dismiss()
 
         btn_guardar.bind(on_press=guardar)
         popup.open()
 
-    #Cargar ruta
     def cargar_ruta(self, name_ruta):
         if name_ruta not in self.rutas_guardadas:
             return
 
         self.puntos = list(self.rutas_guardadas[name_ruta])
-
         self.ids.map_view.canvas.clear()
-        self.ids.map_view.children[:] = [w for w in self.ids.map_view.children if not isinstance(w, MapMarker)]
+        self.linea = None
+        self.ids.map_view.children[:] = [
+            w for w in self.ids.map_view.children if not isinstance(w, MapMarker)
+        ]
 
-        for x, y in self.puntos:
-            lat, lon = self.ids.map_view.get_latlon_at(x, y)
+        for lat, lon in self.puntos:
             marker = MapMarker(lat=lat, lon=lon)
             self.ids.map_view.add_widget(marker)
 
         self.dibujar_ruta(self.ids.map_view)
-        print(f"Ruta Cargada: {name_ruta}")
+

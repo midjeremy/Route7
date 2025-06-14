@@ -22,13 +22,23 @@ class LoginScreen(Screen):
             return
         verificar = self.verificar_type_user(rut, contrasena)
 
+    '''
+    Verifica el tipo de usuario y redirige a la pantalla correspondiente
+    Si el usuario es camionero, se redirige a "mapa"
+    Si el usuario es administrador, se redirige a "admin"
+    Si las credenciales son incorrectas, se muestra un mensaje de error
+    Si el usuario no existe, se muestra un mensaje de error
+    Args:
+        rut (str): RUT del usuario
+        contrasena (str): Contraseña del usuario
+    '''
 
     def verificar_type_user(self, rut, contrasena):
         usuario = coleccion_UC.find_one({"rut": rut})
         if usuario:
             if usuario.get("contrasena") == contrasena:
                 self.ids.mensaje_error.text = ""
-                self.manager.current = "mapa"
+                self.manager.current = "user"
                 os.system('cls')
                 print(f'{usuario.get('rut')} || {usuario.get('contrasena')}')
             else:
@@ -48,6 +58,13 @@ class LoginScreen(Screen):
 
             
 
+    '''
+    Validador de RUT chileno
+    con ultimo digito verificador
+    datos recibidos como string
+    Ejemplo: 12345678-9 o 12345678-k
+    Retorna True si el RUT es válido, False en caso contrario.
+    '''
 
     def validar_rut(self, rut):
         rut = rut.replace(".", "").replace("-", "")
