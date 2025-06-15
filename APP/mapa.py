@@ -88,3 +88,6 @@ class MapScreen(Screen):
 
         self.dibujar_ruta(self.ids.map_view)
 
+    def salir_mapa(self):
+        self.manager.current = 'admin'
+
