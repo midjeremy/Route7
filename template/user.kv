@@ -1,0 +1,84 @@
+<RastreoScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        spacing: 10
+
+        Label:
+            text: "Inicio"
+            size_hint_y: None
+            height: 40
+            bold: True
+
+        BoxLayout:
+            size_hint_y: None
+            height: 40
+            spacing: 10
+
+            Button:
+                text: "USUARIO"
+
+            Button:
+                text: "DESCONECTAR"
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            spacing: 10
+
+            Label:
+                text: "Hora salida"
+
+            Button:
+                text: "CAMION 1"
+                size_hint_x: 0.5
+
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: None
+            height: 200
+            canvas.before:
+                Color:
+                    rgba: 0.2, 0.6, 0.2, 0.2  # Un color suave para simular mapa
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            Label:
+                text: "MAPA ABSTRACTO"
+                bold: True
+                font_size: '20sp'
+                size_hint_y: None
+                height: 40
+                halign: 'center'
+
+        GridLayout:
+            cols: 2
+            row_force_default: True
+            row_default_height: 30
+            spacing: 5
+
+            Label:
+                text: "DESTINO"
+            Label:
+                text: "Nomb. Destino"
+
+            Label:
+                text: "DISTANCIA"
+            Label:
+                text: "km      Minutos"
+
+        Widget:
+            size_hint_y: None
+            height: 20
+
+        Label:
+            text: "LOGUITO"
+            font_size: '16sp'
+            size_hint_y: None
+            height: 40
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Line:
+                    circle: (self.center_x, self.center_y, 60)
