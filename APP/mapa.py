@@ -43,11 +43,15 @@ class MapScreen(Screen):
 
     def limpiar_ruta(self):
         self.puntos.clear()
-        self.ids.map_view.canvas.clear()
-        self.linea = None
+
+        if self.linea:
+            self.ids.map_view.canvas.remove(self.linea)
+            self.linea = None
+        
         self.ids.map_view.children[:] = [
             w for w in self.ids.map_view.children if not isinstance(w, MapMarker)
         ]
+
 
     def save_ruta(self):
         if not self.puntos:
@@ -76,11 +80,15 @@ class MapScreen(Screen):
             return
 
         self.puntos = list(self.rutas_guardadas[name_ruta])
-        self.ids.map_view.canvas.clear()
-        self.linea = None
+
+        if self.linea:
+            self.ids.map_view.canvas.remove(self.linea)
+            self.linea = None
+
         self.ids.map_view.children[:] = [
             w for w in self.ids.map_view.children if not isinstance(w, MapMarker)
         ]
+
 
         for lat, lon in self.puntos:
             marker = MapMarker(lat=lat, lon=lon)
