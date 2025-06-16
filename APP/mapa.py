@@ -9,9 +9,10 @@ from kivy.graphics import Line, Color
 class MapScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.puntos = []  # Guarda (lat, lon)
+        self.puntos = []
         self.linea = None
         self.rutas_guardadas = {}
+        self.marcadores = []  # Lista para rastrear los marcadores agregados
 
     def on_kv_post(self, base_widget):
         self.ids.map_view.bind(on_touch_down=self.on_map_touch)
@@ -23,6 +24,8 @@ class MapScreen(Screen):
         lat, lon = map_view.get_latlon_at(touch.x, touch.y)
         marker = MapMarker(lat=lat, lon=lon)
         map_view.add_widget(marker)
+
+        self.marcadores.append(marker)  # Guardamos el marcador
 
         self.puntos.append((lat, lon))
         self.dibujar_ruta(map_view)
@@ -45,12 +48,18 @@ class MapScreen(Screen):
         self.puntos.clear()
 
         if self.linea:
-            self.ids.map_view.canvas.remove(self.linea)
+            try:
+                self.ids.map_view.canvas.remove(self.linea)
+            except Exception as e:
+                print(f"Error al eliminar la línea: {e}")
             self.linea = None
-        
-        self.ids.map_view.children[:] = [
-            w for w in self.ids.map_view.children if not isinstance(w, MapMarker)
-        ]
+
+        # Eliminar todos los marcadores correctamente
+        map_view = self.ids.map_view
+        for marker in self.marcadores:
+            map_view.remove_widget(marker)
+        self.marcadores.clear()  # Limpiar la lista de marcadores
+
 
 
     def save_ruta(self):
@@ -82,19 +91,27 @@ class MapScreen(Screen):
         self.puntos = list(self.rutas_guardadas[name_ruta])
 
         if self.linea:
-            self.ids.map_view.canvas.remove(self.linea)
+            try:
+                self.ids.map_view.canvas.remove(self.linea)
+            except Exception as e:
+                print(f"Error al eliminar la línea: {e}")
             self.linea = None
 
-        self.ids.map_view.children[:] = [
-            w for w in self.ids.map_view.children if not isinstance(w, MapMarker)
-        ]
+        # Eliminar todos los marcadores actuales
+        map_view = self.ids.map_view
+        for marker in self.marcadores:
+            map_view.remove_widget(marker)
+        self.marcadores.clear()
 
-
+        # Agregar los marcadores de la ruta cargada
         for lat, lon in self.puntos:
             marker = MapMarker(lat=lat, lon=lon)
-            self.ids.map_view.add_widget(marker)
+            map_view.add_widget(marker)
+            self.marcadores.append(marker)
 
-        self.dibujar_ruta(self.ids.map_view)
+        # Redibujar la ruta cargada
+        self.dibujar_ruta(map_view)
+
 
     def salir_mapa(self):
         self.manager.current = 'admin'
