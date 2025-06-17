@@ -1,5 +1,5 @@
 from kivy.uix.screenmanager import Screen
-from db import get_db
+from APP.db import get_db
 import os
 
 # Conexión a MongoDB

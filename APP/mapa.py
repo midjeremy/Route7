@@ -1,3 +1,8 @@
+import json
+import os
+from pymongo import MongoClient  # Importación de pymongo
+from APP.db import get_db  # Asumiendo que esta función retorna un objeto MongoClient o una base de datos
+
 from kivy.uix.screenmanager import Screen
 from kivy.uix.popup import Popup
 from kivy.uix.textinput import TextInput
@@ -12,10 +17,12 @@ class MapScreen(Screen):
         self.puntos = []
         self.linea = None
         self.rutas_guardadas = {}
-        self.marcadores = []  # Lista para rastrear los marcadores agregados
+        self.marcadores = []
 
     def on_kv_post(self, base_widget):
         self.ids.map_view.bind(on_touch_down=self.on_map_touch)
+        self.cargar_rutas_desde_db()
+
 
     def on_map_touch(self, map_view, touch):
         if not map_view.collide_point(*touch.pos):
@@ -24,8 +31,7 @@ class MapScreen(Screen):
         lat, lon = map_view.get_latlon_at(touch.x, touch.y)
         marker = MapMarker(lat=lat, lon=lon)
         map_view.add_widget(marker)
-
-        self.marcadores.append(marker)  # Guardamos el marcador
+        self.marcadores.append(marker)
 
         self.puntos.append((lat, lon))
         self.dibujar_ruta(map_view)
@@ -33,7 +39,10 @@ class MapScreen(Screen):
 
     def dibujar_ruta(self, map_view):
         if self.linea:
-            map_view.canvas.remove(self.linea)
+            try:
+                map_view.canvas.remove(self.linea)
+            except Exception as e:
+                print(f"Error al eliminar la línea: {e}")
 
         puntos_dibujo = []
         for lat, lon in self.puntos:
@@ -54,13 +63,10 @@ class MapScreen(Screen):
                 print(f"Error al eliminar la línea: {e}")
             self.linea = None
 
-        # Eliminar todos los marcadores correctamente
-        map_view = self.ids.map_view
-        for marker in self.marcadores:
-            map_view.remove_widget(marker)
-        self.marcadores.clear()  # Limpiar la lista de marcadores
-
-
+            map_view = self.ids.map_view
+            for marker in self.marcadores:
+                map_view.remove_widget(marker)
+            self.marcadores.clear()
 
     def save_ruta(self):
         if not self.puntos:
@@ -79,10 +85,75 @@ class MapScreen(Screen):
             if name_ruta:
                 self.rutas_guardadas[name_ruta] = list(self.puntos)
                 self.ids.ruta_selector.values = list(self.rutas_guardadas.keys())
+
+                # Guardamos como JSON
+                filename = self.guardar_ruta_en_json(name_ruta)
+
+                # Guardamos en MongoDB
+                self.guardar_en_base_de_datos(filename)
+
+                # Eliminamos el archivo JSON
+                self.eliminar_json(filename)
+
                 popup.dismiss()
 
         btn_guardar.bind(on_press=guardar)
         popup.open()
+
+    def guardar_ruta_en_json(self, nombre_ruta):
+        ruta_json = {
+            "nombre_ruta": nombre_ruta,
+            "coordenadas": [{"lat": lat, "lon": lon} for lat, lon in self.puntos]
+        }
+
+        filename = f"{nombre_ruta.replace(' ', '_')}.json"
+
+        with open(filename, 'w', encoding='utf-8') as f:
+            json.dump(ruta_json, f, ensure_ascii=False, indent=4)
+
+        print(f"Ruta guardada en {filename}")
+        return filename
+
+    def guardar_en_base_de_datos(self, filename):
+        try:
+            db = get_db()  # Obtenemos la base de datos
+            rutas_collection = db['Rutas_Camiones']  # Llamamos a la colección 'rutas'
+
+            with open(filename, 'r', encoding='utf-8') as f:
+                ruta_data = json.load(f)
+
+            rutas_collection.insert_one(ruta_data)
+
+            print(f"Ruta '{ruta_data['nombre_ruta']}' guardada en MongoDB con éxito")
+        except Exception as e:
+            print(f"Error al guardar en MongoDB: {e}")
+
+    def cargar_rutas_desde_db(self):
+        try:
+            db = get_db()
+            rutas_collection = db['Rutas_Camiones']
+            rutas = rutas_collection.find()  # Traemos todas las rutas
+
+            self.rutas_guardadas.clear()
+            for ruta in rutas:
+                nombre = ruta.get('nombre_ruta')
+                coordenadas = ruta.get('coordenadas', [])
+                puntos = [(coord['lat'], coord['lon']) for coord in coordenadas]
+                if nombre:
+                    self.rutas_guardadas[nombre] = puntos
+            
+            # Actualizamos el Spinner con los nombres de ruta
+            self.ids.ruta_selector.values = list(self.rutas_guardadas.keys())
+        except Exception as e:
+            print(f"Error al cargar rutas desde MongoDB: {e}")
+
+
+    def eliminar_json(self, filename):
+        if os.path.exists(filename):
+            os.remove(filename)
+            print(f"Archivo {filename} eliminado correctamente")
+        else:
+            print(f"El archivo {filename} no existe")
 
     def cargar_ruta(self, name_ruta):
         if name_ruta not in self.rutas_guardadas:
@@ -90,6 +161,7 @@ class MapScreen(Screen):
 
         self.puntos = list(self.rutas_guardadas[name_ruta])
 
+        # Limpiar ruta anterior (línea y marcadores)
         if self.linea:
             try:
                 self.ids.map_view.canvas.remove(self.linea)
@@ -97,22 +169,19 @@ class MapScreen(Screen):
                 print(f"Error al eliminar la línea: {e}")
             self.linea = None
 
-        # Eliminar todos los marcadores actuales
-        map_view = self.ids.map_view
+            map_view = self.ids.map_view
         for marker in self.marcadores:
             map_view.remove_widget(marker)
         self.marcadores.clear()
 
-        # Agregar los marcadores de la ruta cargada
+        # Agregar marcadores para la nueva ruta
         for lat, lon in self.puntos:
             marker = MapMarker(lat=lat, lon=lon)
             map_view.add_widget(marker)
             self.marcadores.append(marker)
 
-        # Redibujar la ruta cargada
         self.dibujar_ruta(map_view)
 
-
+    
     def salir_mapa(self):
         self.manager.current = 'admin'
-
