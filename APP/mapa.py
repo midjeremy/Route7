@@ -18,9 +18,12 @@ class MapScreen(Screen):
         self.linea = None
         self.rutas_guardadas = {}
         self.marcadores = []
+        self.modo_edicion = False
+
 
     def on_kv_post(self, base_widget):
         self.ids.map_view.bind(on_touch_down=self.on_map_touch)
+        self.ids.map_view.bind(on_map_relocated=self.redibujar_ruta)
         self.cargar_rutas_desde_db()
 
 
@@ -28,6 +31,11 @@ class MapScreen(Screen):
         if not map_view.collide_point(*touch.pos):
             return False
 
+        # Si el modo edición no está activado, dejamos pasar el evento
+        if not self.modo_edicion:
+            return False  # Así el mapa puede moverse normalmente
+
+        # Si el modo edición está activo, agregamos el punto
         lat, lon = map_view.get_latlon_at(touch.x, touch.y)
         marker = MapMarker(lat=lat, lon=lon)
         map_view.add_widget(marker)
@@ -35,7 +43,12 @@ class MapScreen(Screen):
 
         self.puntos.append((lat, lon))
         self.dibujar_ruta(map_view)
-        return True
+
+        # Desactivamos el modo edición después de agregar
+        self.modo_edicion = False
+
+        return True  # Solo consumimos el evento cuando estamos en modo edición
+
 
     def dibujar_ruta(self, map_view):
         if self.linea:
@@ -52,6 +65,7 @@ class MapScreen(Screen):
         with map_view.canvas:
             Color(1, 0, 0, 1)
             self.linea = Line(points=puntos_dibujo, width=2)
+
 
     def limpiar_ruta(self):
         self.puntos.clear()
@@ -181,6 +195,15 @@ class MapScreen(Screen):
             self.marcadores.append(marker)
 
         self.dibujar_ruta(map_view)
+
+    def activar_modo_edicion(self):
+        self.modo_edicion = True
+        print("Modo edición activado")
+
+    def redibujar_ruta(self, *args):
+        if not self.puntos:
+            return
+        self.dibujar_ruta(self.ids.map_view)
 
     
     def salir_mapa(self):
