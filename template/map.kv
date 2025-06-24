@@ -24,7 +24,7 @@
                 id: ruta_selector
                 text: 'Selecciona Ruta'
                 values: []
-                on_text: root.cargar_ruta(self.text)
+                on_text: if self.text != 'Selecciona Ruta': root.cargar_ruta(self.text)
                 background_normal: ''
                 background_color: 0.5, 0.5, 0.5, 1	
                 color: 1, 1, 1, 1

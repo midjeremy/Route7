@@ -170,11 +170,14 @@ class MapScreen(Screen):
             print(f"El archivo {filename} no existe")
 
     def cargar_ruta(self, name_ruta):
+        print(f"Intentando cargar la ruta: {name_ruta}")
+        print(f"Rutas disponibles: {list(self.rutas_guardadas.keys())}")
+
         if name_ruta not in self.rutas_guardadas:
+            print("Ruta no encontrada en rutas_guardadas.")
             return
 
         self.puntos = list(self.rutas_guardadas[name_ruta])
-
         # Limpiar ruta anterior (línea y marcadores)
         if self.linea:
             try:
@@ -183,7 +186,7 @@ class MapScreen(Screen):
                 print(f"Error al eliminar la línea: {e}")
             self.linea = None
 
-            map_view = self.ids.map_view
+        map_view = self.ids.map_view
         for marker in self.marcadores:
             map_view.remove_widget(marker)
         self.marcadores.clear()
@@ -195,6 +198,7 @@ class MapScreen(Screen):
             self.marcadores.append(marker)
 
         self.dibujar_ruta(map_view)
+
 
     def activar_modo_edicion(self):
         self.modo_edicion = True
