@@ -11,6 +11,21 @@ from kivy.uix.button import Button
 from kivy_garden.mapview import MapView, MapMarker
 from kivy.graphics import Line, Color
 
+def get_Rutas():
+    try:
+        db = get_db()
+        rutas_collection = db['Rutas_camiones']
+        rutas = rutas_collection.find()
+
+        for ruta in rutas:
+            nombre = ruta.get('nombre_ruta')
+            coordenadas = ruta.get('coordenadas', [])
+
+    except:
+        pass
+
+
+
 class MapScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -142,24 +157,6 @@ class MapScreen(Screen):
         except Exception as e:
             print(f"Error al guardar en MongoDB: {e}")
 
-    def cargar_rutas_desde_db(self):
-        try:
-            db = get_db()
-            rutas_collection = db['Rutas_Camiones']
-            rutas = rutas_collection.find()  # Traemos todas las rutas
-
-            self.rutas_guardadas.clear()
-            for ruta in rutas:
-                nombre = ruta.get('nombre_ruta')
-                coordenadas = ruta.get('coordenadas', [])
-                puntos = [(coord['lat'], coord['lon']) for coord in coordenadas]
-                if nombre:
-                    self.rutas_guardadas[nombre] = puntos
-            
-            # Actualizamos el Spinner con los nombres de ruta
-            self.ids.ruta_selector.values = list(self.rutas_guardadas.keys())
-        except Exception as e:
-            print(f"Error al cargar rutas desde MongoDB: {e}")
 
 
     def eliminar_json(self, filename):
